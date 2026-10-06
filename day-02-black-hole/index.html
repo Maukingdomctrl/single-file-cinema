@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Black Hole</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden}
+body{font-family:Georgia,"Times New Roman",serif;color:#f4e8d8;-webkit-tap-highlight-color:transparent}
+
+#root{
+  --d:min(94vw,60vh);
+  --px:0px;--py:0px;
+  position:fixed;inset:0;background:#000;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 54%,#0b0604 0%,#020102 55%,#000 100%);
+}
+#root.noanim *{transition:none!important}
+
+/* ---------- world / parallax ---------- */
+.world{position:absolute;inset:0;transform:translate3d(var(--px),var(--py),0);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.hole{
+  position:absolute;left:50%;top:54%;width:var(--d);height:var(--d);
+  margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);
+  transform:scale(1);transform-origin:50% 50%;
+  animation:breathe 9s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+
+.hole>div{position:absolute;border-radius:50%}
+
+.haze{inset:-35%;
+  background:radial-gradient(circle,rgba(255,120,30,.22) 0%,rgba(190,60,10,.10) 32%,rgba(0,0,0,0) 62%);
+  filter:blur(30px);mix-blend-mode:screen;}
+
+/* tilted flat disc */
+.tilt{inset:-6%;transform:rotateX(72deg) rotateZ(-10deg);transform-style:preserve-3d;perspective:900px}
+.disc{inset:0;border-radius:50%;
+  background:
+    conic-gradient(from 0deg,#ffe9c8 0deg,#ff9a3c 40deg,#7a2200 90deg,#ff7b1f 140deg,#fff2dc 190deg,#ff8a2b 240deg,#6a1a00 290deg,#ffb066 330deg,#ffe9c8 360deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 31%,#000 36%,#000 52%,transparent 71%);
+          mask:radial-gradient(circle,transparent 0 31%,#000 36%,#000 52%,transparent 71%);
+  filter:blur(3px) saturate(1.2);mix-blend-mode:screen;
+  animation:spin 14s linear infinite;
+}
+.disc.b{filter:blur(16px) saturate(1.5);opacity:.9;animation-duration:22s;animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* vertical lensed halo (back of the disc bent over the hole) */
+.halo{inset:11%;
+  background:radial-gradient(circle,transparent 0 40%,rgba(255,236,205,.95) 44%,rgba(255,140,40,.8) 49%,rgba(190,70,10,.35) 58%,transparent 70%);
+  filter:blur(5px);mix-blend-mode:screen;animation:pulseIdle 7s ease-in-out infinite}
+.halo.b{inset:4%;filter:blur(28px);opacity:.55;animation-duration:9s}
+@keyframes pulseIdle{0%,100%{opacity:.9}50%{opacity:1}}
+
+/* lens flare ring */
+.lens{inset:24.5%;
+  border:1.5px solid rgba(255,244,225,.85);
+  box-shadow:0 0 14px 2px rgba(255,190,110,.7),0 0 60px 8px rgba(255,120,30,.35),inset 0 0 22px rgba(255,170,80,.45);
+  animation:ringDrift 11s linear infinite}
+@keyframes ringDrift{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.012);opacity:1}}
+.flare{left:-12%;right:-12%;top:49.7%;height:.6%;border-radius:50%;
+  background:linear-gradient(90deg,transparent,rgba(255,200,140,.55) 40%,rgba(255,250,240,.9) 50%,rgba(255,200,140,.55) 60%,transparent);
+  filter:blur(2px);mix-blend-mode:screen;opacity:.7}
+
+/* perfectly black center */
+.core{inset:34.5%;background:#000;box-shadow:0 0 40px 18px #000,0 0 90px 30px rgba(0,0,0,.9)}
+
+/* tiny human silhouette */
+.figure{left:50%;top:50%;width:6%;height:14%;margin:-7% 0 0 -3%;border-radius:0;opacity:0;
+  transition:opacity 1.6s ease;filter:blur(1.2px);animation:floaty 5s ease-in-out infinite}
+.figure::before{content:"";position:absolute;left:50%;top:0;width:36%;height:22%;margin-left:-18%;border-radius:50%;background:#2a2a30;box-shadow:0 0 10px 2px rgba(180,190,255,.25)}
+.figure::after{content:"";position:absolute;left:18%;right:18%;top:26%;bottom:0;border-radius:40% 40% 18% 18%;background:linear-gradient(#2d2d34,#17171b);box-shadow:0 0 12px 2px rgba(180,190,255,.2)}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6%) rotate(5deg)}}
+
+/* ---------- title ---------- */
+.title{position:absolute;left:0;right:0;top:8vh;text-align:center;padding:0 6vw;pointer-events:none;
+  transition:opacity .8s ease}
+.title h1{font-weight:400;font-size:clamp(20px,4.6vw,58px);letter-spacing:.42em;line-height:1.5;
+  text-indent:.42em;color:#f6e9d6;text-shadow:0 0 24px rgba(255,160,70,.45),0 0 2px rgba(255,255,255,.5)}
+.title p{margin-top:2.2vh;font-family:"Helvetica Neue",Arial,sans-serif;font-size:clamp(10px,1.7vw,20px);
+  letter-spacing:.6em;text-indent:.6em;text-transform:uppercase;color:rgba(255,214,170,.6)}
+
+/* ---------- button ---------- */
+.btn{
+  position:absolute;left:50%;bottom:11vh;transform:translate(-50%,24px);opacity:0;pointer-events:none;
+  font-family:"Helvetica Neue",Arial,sans-serif;font-size:clamp(13px,2vw,24px);letter-spacing:.5em;text-indent:.5em;
+  text-transform:uppercase;color:#fff3e2;background:rgba(20,8,2,.55);
+  border:1px solid rgba(255,190,120,.75);border-radius:999px;padding:1.5em 3.2em;cursor:pointer;
+  box-shadow:0 0 18px rgba(255,140,50,.45),inset 0 0 18px rgba(255,140,50,.18);
+  transition:opacity 1.2s ease,transform 1.2s ease,background .3s,box-shadow .3s,letter-spacing .3s;
+  animation:btnPulse 2.4s ease-in-out infinite;z-index:20;backdrop-filter:blur(4px)}
+.btn:hover,.btn:focus-visible{background:rgba(255,150,60,.28);letter-spacing:.62em;outline:none;
+  box-shadow:0 0 34px rgba(255,170,80,.9),0 0 90px rgba(255,120,30,.5),inset 0 0 26px rgba(255,170,80,.4)}
+.btn:active{transform:translate(-50%,2px) scale(.97)}
+@keyframes btnPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(255,140,50,.4))}50%{filter:drop-shadow(0 0 20px rgba(255,160,70,.95))}}
+.ready .btn{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+
+/* ---------- canvas, film layers ---------- */
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.vignette{position:absolute;inset:0;pointer-events:none;z-index:30;
+  background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.92) 100%)}
+.grain{position:absolute;inset:-50%;width:200%;height:200%;pointer-events:none;z-index:31;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grain 1s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-5%,-2%)}80%{transform:translate(4%,4%)}100%{transform:translate(0,0)}}
+
+/* ---------- story states ---------- */
+/* 2s: bend + pulse */
+.bend .halo{animation:pulseFast 1.3s ease-in-out infinite}
+.bend .halo.b{animation-duration:1.7s}
+.bend .lens{animation:ringPulse 1.3s ease-in-out infinite}
+.bend .haze{animation:hazePulse 1.3s ease-in-out infinite}
+@keyframes pulseFast{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.045)}}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.03);opacity:1}}
+@keyframes hazePulse{0%,100%{opacity:.8}50%{opacity:1.0;transform:scale(1.06)}}
+.bend .disc{animation-duration:9s}
+/* 3.5s figure */
+.figure-on .figure{opacity:.55}
+/* 5s: ready (figure fades) */
+.ready .figure{opacity:0;transition-duration:1.2s}
+
+/* dive */
+.dive .hole{animation:none;transform:scale(1);transition:transform 2.3s cubic-bezier(.65,0,.95,.5)}
+.diving .hole{transform:scale(22)}
+.dive .title{opacity:0}
+.dive .btn{opacity:0!important;pointer-events:none!important;transition:opacity .2s}
+
+.blackout,.flash,.light{position:absolute;inset:0;pointer-events:none;opacity:0}
+.blackout{background:#000;z-index:40}
+.flash{background:#fff;z-index:41}
+.light{z-index:42;background:radial-gradient(circle at 50% 50%,#fffdf6 0%,#fff0d6 45%,#ffd9a0 100%);transition:opacity 1s ease-in}
+.black .blackout{opacity:1;transition:opacity .05s}
+.flashing .flash{opacity:1;transition:opacity .05s}
+.flashfade .flash{opacity:0;transition:opacity .6s ease-out}
+.filled .light{opacity:1}
+
+.final{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:0 7vw;pointer-events:none}
+.final h2{font-weight:400;font-size:clamp(34px,9.2vw,120px);line-height:1.18;letter-spacing:.16em;text-indent:.16em;color:#1a0f06;
+  opacity:0;transform:scale(1.08);filter:blur(10px);
+  transition:opacity 1.4s ease,transform 2.4s cubic-bezier(.2,.7,.2,1),filter 1.4s ease;
+  text-shadow:0 0 40px rgba(255,160,60,.55)}
+.final .sub{margin-top:5vh;font-size:clamp(16px,3.2vw,40px);letter-spacing:.35em;text-indent:.35em;font-style:italic;color:#4a2a10;
+  opacity:0;transform:translateY(12px);transition:opacity 1.4s ease,transform 1.4s ease}
+.final .ret{margin-top:9vh;font-family:"Helvetica Neue",Arial,sans-serif;font-size:clamp(11px,1.6vw,18px);letter-spacing:.45em;text-indent:.45em;
+  text-transform:uppercase;color:#3a2210;background:rgba(255,255,255,.35);border:1px solid rgba(60,30,10,.55);border-radius:999px;
+  padding:1.1em 2.6em;cursor:pointer;opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity 1s ease,transform 1s ease,background .3s,letter-spacing .3s}
+.final .ret:hover,.final .ret:focus-visible{background:rgba(255,255,255,.8);letter-spacing:.58em;outline:none}
+.text1 .final h2{opacity:1;transform:scale(1);filter:blur(0)}
+.text2 .final .sub{opacity:1;transform:none}
+.text3 .final .ret{opacity:1;transform:none;pointer-events:auto}
+.filled .vignette{opacity:.25;transition:opacity 1.5s}
+
+@media (prefers-reduced-motion:reduce){
+  .hole,.disc,.halo,.lens,.figure,.grain,.btn,.bend .halo,.bend .lens,.bend .haze{animation:none!important}
+  .world{transition:none}
+  .diving .hole{transition-duration:.6s}
+}
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="world" id="world">
+    <div class="hole" id="hole">
+      <div class="haze"></div>
+      <div class="halo b"></div>
+      <div class="tilt"><div class="disc b"></div><div class="disc"></div></div>
+      <div class="halo"></div>
+      <div class="lens"></div>
+      <div class="flare"></div>
+      <div class="core"></div>
+      <div class="figure"></div>
+    </div>
+  </div>
+
+  <canvas id="fx"></canvas>
+
+  <header class="title">
+    <h1>DON'T LOOK AT THE CENTER</h1>
+    <p>Event horizon · Do not approach</p>
+  </header>
+
+  <button class="btn" id="go" type="button">STEP CLOSER</button>
+
+  <div class="blackout"></div>
+  <div class="flash"></div>
+  <div class="light"></div>
+
+  <div class="final">
+    <h2>YOU WERE ALREADY INSIDE.</h2>
+    <div class="sub">Happy Monday.</div>
+    <button class="ret" id="ret" type="button">Return</button>
+  </div>
+
+  <div class="vignette"></div>
+  <div class="grain"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.getElementById('root');
+  var go=document.getElementById('go');
+  var ret=document.getElementById('ret');
+  var cv=document.getElementById('fx');
+  var ctx=cv.getContext('2d');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var demo=/[?&]demo(=|&|$)/.test(location.search);
+
+  var W=0,H=0,DPR=1,CX=0,CY=0,MAXR=1,COREPX=0,HOLED=0;
+  var mode='calm';           // calm | bend | dive
+  var bendK=0, diveV=0, diveT=0, burst=false, burstT=0;
+  var state='idle';          // idle | diving | done
+  var timers=[];
+  var px=0,py=0;
+
+  function later(fn,ms){timers.push(setTimeout(fn,ms));}
+  function clearTimers(){timers.forEach(clearTimeout);timers=[];}
+
+  /* ---------- canvas ---------- */
+  function resize(){
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    W=window.innerWidth;H=window.innerHeight;
+    cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    CX=W/2;CY=H*0.54;
+    MAXR=Math.hypot(Math.max(CX,W-CX),Math.max(CY,H-CY));
+    HOLED=Math.min(W*0.94,H*0.60);
+    COREPX=HOLED*0.155;
+  }
+  window.addEventListener('resize',resize);
+  resize();
+
+  var N=reduce?160:420;
+  var stars=[];
+  function mkStar(far){
+    return {a:Math.random()*6.2832,
+            r:far?(0.08+Math.random()*1.0):Math.random(),
+            s:0.4+Math.random()*1.5,
+            t:Math.random()*6.28,
+            h:Math.random()};
+  }
+  function initStars(){stars=[];for(var i=0;i<N;i++)stars.push(mkStar(true));}
+  initStars();
+
+  var parts=[];
+  function spawnPart(){
+    var a=Math.random()*6.2832;
+    parts.push({a:a,r:0.75+Math.random()*0.5,v:0.002+Math.random()*0.004,s:0.8+Math.random()*2.2,hot:Math.random()});
+  }
+
+  var last=performance.now();
+  function frame(now){
+    var dt=Math.min(now-last,50);last=now;
+    ctx.clearRect(0,0,W,H);
+
+    // easing of the mode intensities
+    var bendTarget=(mode==='bend')?1:0;
+    bendK+=(bendTarget-bendK)*Math.min(1,dt/1200);
+    if(mode==='dive'){diveT+=dt;diveV=Math.min(1,diveT/1800);}
+    else {diveV=0;}
+
+    var k=dt/16.67;
+    ctx.globalCompositeOperation='lighter';
+    for(var i=0;i<stars.length;i++){
+      var s=stars[i];
+      if(mode==='dive'){
+        // fly forward: stars stream outward
+        var accel=0.0016+diveV*diveV*0.05;
+        var r0=s.r;
+        s.r+=s.r*accel*dt*0.06*(0.5+s.s*0.5)+0.0005*k;
+        var streak=diveV*diveV*(0.9+s.s*0.5);
+        var rr0=Math.max(0.0005,s.r/(1+streak*6));
+        var x1=CX+Math.cos(s.a)*s.r*MAXR,y1=CY+Math.sin(s.a)*s.r*MAXR;
+        var x0=CX+Math.cos(s.a)*rr0*MAXR,y0=CY+Math.sin(s.a)*rr0*MAXR;
+        var al=Math.min(1,0.25+diveV*0.9);
+        ctx.strokeStyle='rgba('+(s.h>.5?'255,236,210':'200,220,255')+','+al+')';
+        ctx.lineWidth=0.6+s.s*0.9*(0.5+diveV);
+        ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+        if(s.r>1.25){s.r=0.01+Math.random()*0.12;s.a=Math.random()*6.2832;}
+        continue;
+      }
+      // calm drift + swirl toward the hole
+      var rad=Math.max(0.03,s.r);
+      s.a+=(0.00004+bendK*0.00035/(rad+0.12))*dt*(reduce?0.3:1);
+      if(!reduce) s.r+=Math.sin(now*0.0003+s.t)*0.00002*dt;
+      if(bendK>0.001){
+        s.r-=bendK*(0.00006+0.00022*(1-rad))*dt;
+        if(s.r<0.07){s.r=0.95+Math.random()*0.1;s.a=Math.random()*6.2832;}
+      }
+      var x=CX+Math.cos(s.a)*s.r*MAXR+px*(0.4+s.s*0.3);
+      var y=CY+Math.sin(s.a)*s.r*MAXR+py*(0.4+s.s*0.3);
+      var d=Math.hypot(x-CX,y-CY);
+      if(d<COREPX*1.05)continue;               // never draw over the black center
+      var tw=0.55+0.45*Math.sin(now*0.002+s.t);
+      var fade=Math.min(1,(d-COREPX)/(COREPX*0.8));
+      var a=(0.25+0.6*s.h)*tw*fade;
+      var stretch=bendK*Math.min(14,6/(s.r+0.15))*0.9; // bent / pulled toward the hole
+      ctx.strokeStyle='rgba('+(s.h>.6?'255,225,190':'205,220,255')+','+a+')';
+      ctx.fillStyle=ctx.strokeStyle;
+      if(stretch>1.2){
+        var ang=Math.atan2(y-CY,x-CX)+Math.PI/2; // tangential smear
+        ctx.lineWidth=s.s*0.8;
+        ctx.beginPath();ctx.moveTo(x,y);
+        ctx.lineTo(x+Math.cos(ang)*stretch*0.7-Math.cos(ang-Math.PI/2)*stretch*0.3,
+                   y+Math.sin(ang)*stretch*0.7-Math.sin(ang-Math.PI/2)*stretch*0.3);
+        ctx.stroke();
+      }else{
+        ctx.beginPath();ctx.arc(x,y,s.s*0.7,0,6.2832);ctx.fill();
+      }
+    }
+
+    // inward particle burst
+    if(burst){
+      burstT+=dt;
+      var rate=burstT<1600?6:0;
+      for(var q=0;q<rate;q++)spawnPart();
+    }
+    for(var j=parts.length-1;j>=0;j--){
+      var p=parts[j];
+      p.v*=1+0.0016*dt;
+      var rOld=p.r;
+      p.r-=p.v*dt*0.9;
+      p.a+=0.0012*dt;
+      if(p.r<0.01){parts.splice(j,1);continue;}
+      var xa=CX+Math.cos(p.a)*p.r*MAXR,ya=CY+Math.sin(p.a)*p.r*MAXR;
+      var xb=CX+Math.cos(p.a-0.0012*dt)*(p.r+p.v*dt*6+0.02)*MAXR,yb=CY+Math.sin(p.a-0.0012*dt)*(p.r+p.v*dt*6+0.02)*MAXR;
+      var g=ctx.createLinearGradient(xb,yb,xa,ya);
+      var c=p.hot>.5?'255,244,225':'255,150,60';
+      g.addColorStop(0,'rgba('+c+',0)');g.addColorStop(1,'rgba('+c+',0.95)');
+      ctx.strokeStyle=g;ctx.lineWidth=p.s;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(xb,yb);ctx.lineTo(xa,ya);ctx.stroke();
+    }
+    ctx.globalCompositeOperation='source-over';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* ---------- parallax ---------- */
+  function onMove(e){
+    var t=e.touches?e.touches[0]:e;
+    if(!t)return;
+    var nx=(t.clientX/W-0.5)*2,ny=(t.clientY/H-0.5)*2;
+    px=nx*10;py=ny*10;
+    root.style.setProperty('--px',(-px).toFixed(1)+'px');
+    root.style.setProperty('--py',(-py).toFixed(1)+'px');
+  }
+  if(!reduce){
+    window.addEventListener('pointermove',onMove,{passive:true});
+    window.addEventListener('touchmove',onMove,{passive:true});
+  }
+
+  /* ---------- timeline ---------- */
+  function setClass(c,on){root.classList[on?'add':'remove'](c);}
+  var ALL=['bend','figure-on','ready','black','dive','diving','flashing','flashfade','filled','text1','text2','text3'];
+
+  function startIntro(){
+    clearTimers();
+    state='idle';mode='calm';bendK=0;diveT=0;diveV=0;burst=false;burstT=0;parts.length=0;
+    initStars();
+    later(function(){setClass('bend',true);mode='bend';},2000);
+    later(function(){setClass('figure-on',true);},3500);
+    later(function(){setClass('figure-on',false);setClass('ready',true);},5000);
+    if(demo){later(function(){go.click();},6000);}
+  }
+
+  function dive(){
+    if(state!=='idle'||!root.classList.contains('ready'))return;
+    state='diving';
+    clearTimers();
+    setClass('ready',false);
+    // 1. black 0.3s
+    setClass('black',true);setClass('dive',true);
+    // 2. white flash
+    later(function(){
+      setClass('black',false);setClass('flashing',true);
+    },300);
+    later(function(){
+      setClass('flashing',false);setClass('flashfade',true);
+      // 3. dive in: disc scales up, stars become streaks
+      setClass('diving',true);mode='dive';diveT=0;
+      // 4. particles burst inward
+      later(function(){burst=true;burstT=0;},350);
+    },420);
+    later(function(){setClass('flashfade',false);},1100);
+    // 5. screen fills with light
+    later(function(){setClass('filled',true);},2400);
+    // 6. big text
+    later(function(){setClass('text1',true);},3500);
+    // 7. 1.5s later, small line
+    later(function(){setClass('text2',true);},5000);
+    // 8. return button
+    later(function(){setClass('text3',true);state='done';},5900);
+  }
+
+  function reset(){
+    clearTimers();
+    root.classList.add('noanim');
+    ALL.forEach(function(c){root.classList.remove(c);});
+    mode='calm';
+    startIntro();
+    requestAnimationFrame(function(){requestAnimationFrame(function(){root.classList.remove('noanim');});});
+  }
+
+  go.addEventListener('click',dive);
+  ret.addEventListener('click',function(){if(state==='done')reset();});
+
+  startIntro();
+})();
+</script>
+</body>
+</html>
