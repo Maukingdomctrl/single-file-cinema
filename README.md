@@ -1,9 +1,10 @@
-# Daily Prompts
+# Single File Cinema
 
-One prompt, one self-contained HTML experience, every day for 30 days.
+One prompt. One file. Zero libraries.
+A cinematic HTML experience every day for 30 days.
 Built with Claude Sonnet 5.5.
 
-Live site: https://YOUR-USERNAME.github.io/daily-prompts/
+Live site: https://Maukingdomctrl.github.io/single-file-cinema/
 
 ## Structure
 Each day lives in its own folder with an `index.html` and a `prompt.txt`.
